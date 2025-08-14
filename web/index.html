@@ -3,7 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JSON Repair - WASM Demo</title>
+    <title>JSON Repair Online | Fix malformed JSON safely in your browser</title>
+    <meta name="description" content="JSON Repair Online – paste malformed JSON and instantly fix syntax errors in your browser. Safe, fast, privacy‑friendly, no uploads. Supports quotes, commas, brackets, and escape sequences.">
+    <meta name="keywords" content="json repair online, fix json, repair json, json fixer, json syntax error, json validator, json formatter, malformed json, json tool">
+    <meta name="robots" content="index,follow">
+    <meta name="author" content="json-repair">
+    <meta name="content-language" content="en,zh-CN">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="JSON Repair Online">
+    <meta property="og:description" content="Fix malformed JSON online in your browser. No upload. Fast and private.">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="JSON Repair Online">
+    <meta name="twitter:description" content="Fix malformed JSON online safely in your browser. No data leaves your device.">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "JSON Repair Online",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "description": "Paste malformed JSON and instantly fix syntax errors in your browser. Safe, fast, privacy‑friendly.",
+      "inLanguage": ["en", "zh-CN"],
+      "featureList": [
+        "Repair malformed JSON syntax",
+        "Handle quotes, commas, brackets, and escapes",
+        "Works fully in the browser (no uploads)",
+        "Copy repaired JSON with one click"
+      ],
+      "keywords": ["json repair online", "fix json", "repair json", "json fixer", "json syntax error"]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is JSON Repair Online?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "JSON Repair Online is a free web tool to automatically fix malformed JSON. It runs entirely in your browser for speed and privacy."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my data uploaded?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. All repairs happen locally via WebAssembly; no JSON is sent to any server."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What kinds of errors can it fix?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Common issues like missing quotes, stray commas, unbalanced brackets, and incorrect escape sequences."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I use it?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Paste or type your malformed JSON, optionally parse or unescape sequences, then click Repair JSON to get a valid result."
+          }
+        }
+      ]
+    }
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -94,45 +164,92 @@
             color: #6c757d;
             font-style: italic;
         }
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+        }
+        .language-switcher button {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin: 0;
+            border-radius: 3px;
+        }
+        .language-switcher button.active {
+            background-color: #28a745;
+        }
+        .language-switcher button.active:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
+    <div class="language-switcher">
+        <button id="lang-en" onclick="switchLanguage('en')" class="active">English</button>
+        <button id="lang-zh" onclick="switchLanguage('zh')">中文</button>
+    </div>
     <div class="container">
-        <h1>JSON Repair - WebAssembly Demo</h1>
+        <h1 data-i18n="title">JSON Repair Online</h1>
+        <p style="text-align: center; color: #555; margin-top: 6px;" data-i18n="subtitle">
+            Fix malformed JSON online — fast, private, and accurate. Runs fully in your browser with no uploads.
+        </p>
 
-        <div id="loading" class="loading">
+        <div id="loading" class="loading" data-i18n="loading">
             Loading WebAssembly module...
         </div>
 
         <div id="content" style="display: none;">
+            <h2 style="margin-top: 0; font-size: 18px; color: #333;" data-i18n="main-heading">Fix malformed JSON online, safely</h2>
+            <p style="color: #555;" data-i18n="main-description">
+                Use this free <strong>JSON repair online</strong> tool to automatically correct common JSON syntax errors. It can handle
+                quotes, commas, brackets, and escape sequences. Your data never leaves your device.
+            </p>
             <div class="input-section">
-                <label for="input">Malformed JSON Input:</label>
-                <div style="margin-bottom: 10px; padding: 10px; background-color: #e9ecef; border-radius: 4px; font-size: 14px;">
+                <label for="input" data-i18n="input-label">Malformed JSON Input:</label>
+                <div style="margin-bottom: 10px; padding: 10px; background-color: #e9ecef; border-radius: 4px; font-size: 14px;" data-i18n="escape-help">
                     <strong>转义处理说明：</strong><br>
                     • <strong>解析转义序列</strong>：将 <code>\n</code>, <code>\t</code> 等转义序列转换为实际的换行符、制表符等<br>
                     • <strong>去转义</strong>：处理被转义的引号等字符，如 <code>\"</code> → <code>"</code><br>
                     • <strong>高级去转义</strong>：适用于从其他地方复制的引号包围的JSON字符串<br>
                     • 推荐使用顺序：先"解析转义序列"，再"修复JSON"
                 </div>
-                <textarea id="input" placeholder="Enter your malformed JSON here...">```json\n{\n\"商品1\":\"大米2袋\",\n\"商品2\":\"酵母500克3袋\",\n\"商品3\":\"无核枣2斤\",\n\"商品4\":\"红豆4斤\",\n\"商品5\":\"圆生菜2斤\"\n}\n```</textarea>
+                <textarea id="input" data-i18n-placeholder="input-placeholder">```json\n{\n\"商品1\":\"大米2袋\",\n\"商品2\":\"酵母500克3袋\",\n\"商品3\":\"无核枣2斤\",\n\"商品4\":\"红豆4斤\",\n\"商品5\":\"圆生菜2斤\"\n}\n```</textarea>
                 <div class="button-group">
-                    <button onclick="handleParseEscapeSequences()" class="warning" title="将 \\n, \\t 等转义序列转换为实际字符">解析转义序列</button>
-                    <button onclick="handleUnescape()" class="secondary" title="处理常见转义字符如 \&quot;, \\n, \\t 等">去转义</button>
-                    <button onclick="handleAdvancedUnescape()" class="secondary" title="高级转义处理，适用于从引号包围的JSON字符串">高级去转义</button>
+                    <button onclick="handleParseEscapeSequences()" class="warning" data-i18n="btn-parse-escape" data-i18n-title="btn-parse-escape-title">解析转义序列</button>
+                    <button onclick="handleUnescape()" class="secondary" data-i18n="btn-unescape" data-i18n-title="btn-unescape-title">去转义</button>
+                    <button onclick="handleAdvancedUnescape()" class="secondary" data-i18n="btn-advanced-unescape" data-i18n-title="btn-advanced-unescape-title">高级去转义</button>
                 </div>
                 <div class="button-group">
-                    <button onclick="handleRepairJSON()">Repair JSON</button>
-                    <button onclick="handleMustRepairJSON()">Must Repair JSON</button>
+                    <button onclick="handleRepairJSON()" data-i18n="btn-repair">Repair JSON</button>
+                    <button onclick="handleMustRepairJSON()" data-i18n="btn-must-repair">Must Repair JSON</button>
                 </div>
             </div>
 
             <div class="output-section">
-                <label for="output">Repaired JSON Output:</label>
+                <label for="output" data-i18n="output-label">Repaired JSON Output:</label>
                 <textarea id="output" readonly></textarea>
-                <button onclick="copyOutput()">Copy to Clipboard</button>
+                <button onclick="copyOutput()" data-i18n="btn-copy">Copy to Clipboard</button>
             </div>
 
             <div id="message"></div>
+
+            <section aria-labelledby="faq-heading" style="margin-top: 24px;">
+                <h2 id="faq-heading" style="font-size: 18px; color: #333;" data-i18n="faq-heading">FAQs about JSON Repair Online</h2>
+                <details>
+                    <summary><strong data-i18n="faq-q1">What is JSON Repair Online?</strong></summary>
+                    <p data-i18n="faq-a1">It's a browser‑based tool that automatically fixes malformed JSON quickly and privately.</p>
+                </details>
+                <details>
+                    <summary><strong data-i18n="faq-q2">Is it private?</strong></summary>
+                    <p data-i18n="faq-a2">Yes. Everything runs locally in your browser via WebAssembly; nothing is uploaded.</p>
+                </details>
+                <details>
+                    <summary><strong data-i18n="faq-q3">What errors can it fix?</strong></summary>
+                    <p data-i18n="faq-a3">Missing quotes, extra commas, unbalanced brackets, and bad escape sequences, among others.</p>
+                </details>
+            </section>
         </div>
     </div>
 
