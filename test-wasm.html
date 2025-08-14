@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WASM Test</title>
+</head>
+<body>
+    <h1>Testing JSON Repair WASM</h1>
+    <div id="status">Loading...</div>
+    <script src="$(go env GOROOT)/lib/wasm/wasm_exec.js"></script>
+    <script>
+        const go = new Go();
+        
+        WebAssembly.instantiateStreaming(fetch('jsonrepair.wasm'), go.importObject)
+            .then(result => {
+                go.run(result.instance);
+                document.getElementById('status').innerHTML = 'WASM loaded successfully!';
+                
+                // Test the repair function
+                const testJSON = '{"name": "test", "value": 123, "invalid": true}';
+                const result = repairJSON(testJSON);
+                document.getElementById('status').innerHTML += `
+                    <br>Test result: ${JSON.stringify(result)}
+                `;
+            })
+            .catch(err => {
+                document.getElementById('status').innerHTML = `Error: ${err.message}`;
+            });
+    </script>
+</body>
+</html>

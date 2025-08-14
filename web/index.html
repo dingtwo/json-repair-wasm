@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Repair - WASM Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .input-section, .output-section {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button.secondary:hover {
+            background-color: #545b62;
+        }
+        button.warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        button.warning:hover {
+            background-color: #e0a800;
+        }
+        .button-group {
+            margin-top: 10px;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #d9534f;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8d7da;
+            border-radius: 4px;
+        }
+        .success {
+            color: #155724;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #d4edda;
+            border-radius: 4px;
+        }
+        .loading {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JSON Repair - WebAssembly Demo</h1>
+
+        <div id="loading" class="loading">
+            Loading WebAssembly module...
+        </div>
+
+        <div id="content" style="display: none;">
+            <div class="input-section">
+                <label for="input">Malformed JSON Input:</label>
+                <div style="margin-bottom: 10px; padding: 10px; background-color: #e9ecef; border-radius: 4px; font-size: 14px;">
+                    <strong>转义处理说明：</strong><br>
+                    • <strong>解析转义序列</strong>：将 <code>\n</code>, <code>\t</code> 等转义序列转换为实际的换行符、制表符等<br>
+                    • <strong>去转义</strong>：处理被转义的引号等字符，如 <code>\"</code> → <code>"</code><br>
+                    • <strong>高级去转义</strong>：适用于从其他地方复制的引号包围的JSON字符串<br>
+                    • 推荐使用顺序：先"解析转义序列"，再"修复JSON"
+                </div>
+                <textarea id="input" placeholder="Enter your malformed JSON here...">```json\n{\n\"商品1\":\"大米2袋\",\n\"商品2\":\"酵母500克3袋\",\n\"商品3\":\"无核枣2斤\",\n\"商品4\":\"红豆4斤\",\n\"商品5\":\"圆生菜2斤\"\n}\n```</textarea>
+                <div class="button-group">
+                    <button onclick="handleParseEscapeSequences()" class="warning" title="将 \\n, \\t 等转义序列转换为实际字符">解析转义序列</button>
+                    <button onclick="handleUnescape()" class="secondary" title="处理常见转义字符如 \&quot;, \\n, \\t 等">去转义</button>
+                    <button onclick="handleAdvancedUnescape()" class="secondary" title="高级转义处理，适用于从引号包围的JSON字符串">高级去转义</button>
+                </div>
+                <div class="button-group">
+                    <button onclick="handleRepairJSON()">Repair JSON</button>
+                    <button onclick="handleMustRepairJSON()">Must Repair JSON</button>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <label for="output">Repaired JSON Output:</label>
+                <textarea id="output" readonly></textarea>
+                <button onclick="copyOutput()">Copy to Clipboard</button>
+            </div>
+
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script src="wasm_exec.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

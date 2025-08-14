@@ -107,44 +107,63 @@ go get github.com/RealAlexandreAI/json-repair
 package main
 
 import (
-    "github.com/RealAlexandreAI/json-repair"
+    jsonrepair "github.com/RealAlexandreAI/json-repair"
 )
 
 func main() {
     // broken JSON string from LLM
     in := "```json {'employees':['John', 'Anna', ```"
 
-    jsonrepair.RepairJSON(in)
-
-    // output:	{"employees":["John","Anna"]}
+    out, _ := jsonrepair.RepairJSON(in)
+    // out: {"employees":["John","Anna"]}
 }
 ```
 
 > Additionally, there is `MustRepairJSON` for scenarios that are not suitable for error handling, such as pipes and
 > trusted environments
 
-_For more examples, please refer to
-the [Test Cases](https://github.com/RealAlexandreAI/json-repair/blob/master/main_test.go)
-Or <a href="https://goplay.tools/snippet/zyLfsLcsTwg">Online Playground</a>_
+_For more examples, please refer to the test suite
+[`jsonrepair_test.go`](./jsonrepair_test.go)
+or the <a href="https://goplay.tools/snippet/zyLfsLcsTwg">Online Playground</a>._
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Terminal CLI
 
 ```bash
-
 brew install realalexandreai/tap-jsonrepair/jsonrepair
 
 # from raw string
 jsonrepair -i "{'employees':['John', 'Anna', "
-# output: {"employees":["John", "Anna", "Peter"]}
 
 # from file
 jsonrepair -f <json-file>.json
 ```
 
-_You can also download binary from Release, please refer to
-the [Releases](https://github.com/RealAlexandreAI/json-repair/releases)._
+_You can also download binaries from the
+[Releases](https://github.com/RealAlexandreAI/json-repair/releases)._
+
+## WebAssembly (WASM) + Web Demo
+
+You can run json-repair in the browser via Go WASM.
+
+```bash
+# Build the WASM module and ensure wasm_exec.js is available
+bash build-wasm.sh
+
+# Serve the demo site
+cd web && python3 -m http.server 8080
+# then open http://localhost:8080
+```
+
+In the demo, two functions are exposed to JS after the runtime starts:
+- `repairJSON(input)` → `{ result: string, error: string|null }`
+- `mustRepairJSON(input)` → `{ result: string, error: string|null }`
+
+Files involved:
+- `wasm-build/main.go` (WASM entrypoint with logs), `wasm.go` (minimal WASM entry)
+- `web/index.html`, `web/app.js`, `web/wasm_exec.js` (runtime)
+- `jsonrepair.wasm` (build output)
 
 
 <!-- ROADMAP -->
